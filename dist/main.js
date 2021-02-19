@@ -14275,7 +14275,7 @@ eval("/*\n\nCopyright (c) 2012-2014 Jeffrey Mealo\n\nPermission is hereby grante
   \*********************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("const faker = __webpack_require__(/*! faker */ \"./node_modules/faker/index.js\");\n\nconst users = new Array(4).fill(\"\").map((_) => faker.name.firstName());\n\nconst userMap = users.reduce((acc, name) => {\n  acc[name] = new Array(1 + faker.random.number(2))\n    .fill(\"\")\n    .map((_) => faker.name.jobTitle());\n  return acc;\n}, {});\n\nmodule.exports = {\n  users,\n  userMap,\n};\n\n\n//# sourceURL=webpack://acme-users/./src/data.js?");
+eval("const faker = __webpack_require__(/*! faker */ \"./node_modules/faker/index.js\");\n\nlet users, userMap;\n\nusers = JSON.parse(window.localStorage.getItem(\"users\"));\nuserMap = JSON.parse(window.localStorage.getItem(\"userMap\"));\n\nif (!users || !userMap) {\n  users = new Array(4).fill(\"\").map((_) => faker.name.firstName());\n  window.localStorage.setItem(\"users\", JSON.stringify(users));\n\n  userMap = users.reduce((acc, name) => {\n    acc[name] = new Array(1 + faker.random.number(2))\n      .fill(\"\")\n      .map((user, index) => {\n        if (index === 0) {\n          return `Job:${faker.name.jobTitle()}`;\n        }\n        if (index === 1) {\n          return `Field: ${faker.name.jobType()}`;\n        }\n        if (index === 2) {\n          return `Location: ${faker.address.state()}`;\n        }\n      });\n    return acc;\n  }, {});\n  window.localStorage.setItem(\"userMap\", JSON.stringify(userMap));\n}\n\nmodule.exports = {\n  users,\n  userMap,\n};\n\n\n//# sourceURL=webpack://acme-users/./src/data.js?");
 
 /***/ }),
 
@@ -14285,7 +14285,17 @@ eval("const faker = __webpack_require__(/*! faker */ \"./node_modules/faker/inde
   \**********************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-eval("const { users, userMap } = __webpack_require__(/*! ./data */ \"./src/data.js\");\n\nconst userList = document.querySelector(\"#user-list\");\n\nlet curr = window.location.hash.slice(1) * 1;\n\nconst render = () => {\n  const html = `\n    ${users\n      .map(\n        (user, index) => `\n    <li><a href ='#${index}'>${user}</a>\n    ${\n      curr === index\n        ? `<ul>${userMap[user]\n            .map(\n              (detail) => `\n        <li> ${detail}</li>`\n            )\n            .join(\"\")}</ul>`\n        : \"\"\n    }\n    </li>`\n      )\n      .join(\"\")}\n      `;\n  userList.innerHTML = html;\n};\n\nrender();\n\nwindow.addEventListener(\"hashchange\", () => {\n  curr = window.location.hash.slice(1) * 1;\n  render();\n});\n\n\n//# sourceURL=webpack://acme-users/./src/index.js?");
+eval("const { users, userMap } = __webpack_require__(/*! ./data */ \"./src/data.js\");\nconst render = __webpack_require__(/*! ./render */ \"./src/render.js\");\nconst userList = document.querySelector(\"#user-list\");\n\nlet curr = window.location.hash.slice(1) * 1;\n\nconst _render = () => {\n  render({ users, userMap, userList, curr });\n};\n\n_render();\n\nwindow.addEventListener(\"hashchange\", () => {\n  curr = window.location.hash.slice(1) * 1;\n  _render();\n});\n\n\n//# sourceURL=webpack://acme-users/./src/index.js?");
+
+/***/ }),
+
+/***/ "./src/render.js":
+/*!***********************!*\
+  !*** ./src/render.js ***!
+  \***********************/
+/***/ ((module) => {
+
+eval("const render = ({ userList, userMap, users, curr }) => {\n  const html = `\n      ${users\n        .map(\n          (user, index) => `\n      <li><a href ='#${index}'>${user}</a>\n      ${\n        curr === index\n          ? `<ul>${userMap[user]\n              .map(\n                (detail) => `\n          <li> ${detail}</li>`\n              )\n              .join(\"\")}</ul>`\n          : \"\"\n      }\n      </li>`\n        )\n        .join(\"\")}\n        `;\n  userList.innerHTML = html;\n};\n\nmodule.exports = render;\n\n\n//# sourceURL=webpack://acme-users/./src/render.js?");
 
 /***/ })
 
